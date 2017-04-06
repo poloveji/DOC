@@ -139,12 +139,18 @@ void main(void)
 				flag=COUNTING;
 			}
 			if(flag==PAUSED){
-				DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
 				//sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
 				//DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 				flag=COUNTING;
 			}
-			if ( (flag==COUNTING) && ((g_time.minute!=0) || (g_time.second!=0))) {
+			if(flag==COUNTING){
+				flag=PAUSED;
+				DisplayLCD(LCD_LINE1,(uint8_t *)"Paused");
+			}
+			
+		}
+		if ( (flag==COUNTING) && ((g_time.minute!=0) || (g_time.second!=0))) {
 				g_time.second--;
 				if(g_time.second==0){
 					if(g_time.minute!=0) {
@@ -166,18 +172,13 @@ void main(void)
 					g_time.second=0;
 				}
 				DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
-				//sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
-				//DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+				sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 				for(i=0; i<=100; i++){
 					Wait1CentiSecond();
 				}
 			}
 			
-			
-			sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
-			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-		
-		}
 		
 	}
 }	
