@@ -135,6 +135,15 @@ void main(void)
 			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 		}
 		if(swt==3){
+			if(flag==SETTING){
+				flag=COUNTING;
+			}
+			if(flag==PAUSED){
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
+				//sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+				//DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+				flag=COUNTING;
+			}
 			if ( (flag==COUNTING) && ((g_time.minute!=0) || (g_time.second!=0))) {
 				g_time.second--;
 				if(g_time.second==0){
@@ -163,11 +172,8 @@ void main(void)
 					Wait1CentiSecond();
 				}
 			}
-			if(flag==PAUSED){
-				DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
-				//sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
-				//DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-			}
+			
+			
 			sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
 			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 		
