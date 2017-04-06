@@ -60,16 +60,21 @@ Macro definitions
 #define SETTING 1 // Setting...
 #define COUNTING 2 // Counting...
 #define PAUSED 3 // Paused...
+#define swt1 0x40
+#define swt2 0x10
+#define swt3 0x20
+
 int time=0;
 char * string_shown_on_lcd[10];
 int flag=SETTING;
-int swt=0;
+int current=0x70;
 int i=0;
 g_time.minute=0;
 g_time.second=0;
-int prev=0;
-int output=0;
-int match_times;
+int prev=0x70;
+int output=0x70;
+int match_times=0;
+int pushed=0;
 
 /******************************************************************************
 Imported global variables and functions (from other files)
@@ -83,7 +88,7 @@ Exported global variables and functions (to be accessed by other files)
 Private global variables and functions
 ******************************************************************************/
 void r_main_userinit(void);
-void ClearChattering(void);
+int ClearChattering(void);
 
 /******************************************************************************
 * Function Name: main
@@ -111,52 +116,52 @@ void main(void)
 	
 	while (1) 
 	{
-		output=0;
-		ClearChattering();
-		if(output==1){
-			if(flag==SETTING){
-				g_time.second=g_time.second+1;
-				if(g_time.second>59){
-					g_time.second=0;
-					g_time.minute=g_time.minute+1;
+		pushed=ClearChattering();
+		if((pushed!=0)&&(pushed!=0x70)){
+			if(pushed==swt1){
+				if(flag==SETTING){
+					g_time.second=g_time.second+1;
+					if(g_time.second>59){
+						g_time.second=0;
+						g_time.minute=g_time.minute+1;
+					}
 				}
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
+				sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 			}
-			DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-			sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
-			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-		}
 		
-		if(output==2){
-			if(flag==SETTING){
-				g_time.minute=g_time.minute+1;
-				DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-				
-			}
-			if(flag==PAUSED){ 
-				g_time.minute=0;
-				g_time.second=0;
-				DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-				flag=SETTING;
-			}
-			sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
-			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-		}
-		if(output==3){
-			if(flag==SETTING){
-				flag=COUNTING;
-				DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
-			}
-			if(flag==PAUSED){
-				DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
-				flag=COUNTING;
-			}
-			if(flag==COUNTING){
-				flag=PAUSED;
-				DisplayLCD(LCD_LINE1,(uint8_t *)"Paused");
+			if(pushed==swt2){
+				if(flag==SETTING){
+					g_time.minute=g_time.minute+1;
+					DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
+				}
+				if(flag==PAUSED){ 
+					g_time.minute=0;
+					g_time.second=0;
+					DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
+					flag=SETTING;
+				}
+				sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 			}
 			
-		}
-		if ( (flag==COUNTING) && ((g_time.minute!=0) || (g_time.second!=0))) {
+			if(pushed==swt3){
+				if(flag==SETTING){
+					flag=COUNTING;
+					DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
+				}
+				if(flag==PAUSED){
+					DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
+					flag=COUNTING;
+				}
+				if(flag==COUNTING){
+					flag=PAUSED;
+					DisplayLCD(LCD_LINE1,(uint8_t *)"Paused");
+				}
+			}
+			
+			if ( (flag==COUNTING) && ((g_time.minute!=0) || (g_time.second!=0))) {
 				g_time.second--;
 				if(g_time.second==0){
 					if(g_time.minute!=0) {
@@ -171,9 +176,11 @@ void main(void)
 						//DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 					}
 				}
+				
 				if(g_time.minute==255){
 					g_time.minute=0;
 				}
+				
 				if(g_time.second==255){
 					g_time.second=0;
 				}
@@ -185,7 +192,7 @@ void main(void)
 				}
 			}
 			
-		
+		}
 	}
 }	
 
@@ -195,18 +202,21 @@ void main(void)
 * Arguments    : none
 * Return Value : none
 ******************************************************************************/
-void ClearChattering(void){
-	if(prev!=swt){
+int ClearChattering(void){
+	prev=output;
+	current = (P7&0x70);
+	if(prev!=current){
 		match_times=0;
-		prev=swt;
+		prev=current;
 	}
 	else{
 		match_times=match_times+1;
 		if(match_times>2){
 			match_times=0
-			output=swt;
+			output=current;
 		}
 	}
+	return (output ^ prevoutput) & (~output);
 }
 
 void r_main_userinit(void)
