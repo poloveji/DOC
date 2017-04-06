@@ -128,7 +128,7 @@ void main(void)
 			if(flag==PAUSED){ 
 				g_time.minute=0;
 				g_time.second=0;
-				DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
 				flag=SETTING;
 			}
 			sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
@@ -137,11 +137,10 @@ void main(void)
 		if(swt==3){
 			if(flag==SETTING){
 				flag=COUNTING;
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
 			}
 			if(flag==PAUSED){
 				DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
-				//sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
-				//DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 				flag=COUNTING;
 			}
 			if(flag==COUNTING){
