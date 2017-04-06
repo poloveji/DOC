@@ -123,6 +123,7 @@ void main(void)
 	
 	while (1) 
 	{
+		ClearChattering();
 		if(output==1){
 			if(flag==SETTING){
 				g_time.second=g_time.second+1;
