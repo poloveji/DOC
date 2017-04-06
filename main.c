@@ -61,7 +61,7 @@ Macro definitions
 #define PAUSED 3 // Paused...
 int time=0;
 char * string_shown_on_lcd[10];
-int flag=0;
+int flag=SETTING;
 int swt=0;
 int i=0;
 g_time.minute=0;
