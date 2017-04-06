@@ -55,6 +55,7 @@ Typedef definitions
 
 /******************************************************************************
 Macro definitions
+
 ******************************************************************************/
 #define SETTING 1 // Setting...
 #define COUNTING 2 // Counting...
@@ -66,6 +67,9 @@ int swt=0;
 int i=0;
 g_time.minute=0;
 g_time.second=0;
+int prev=0;
+int output=0;
+int match_times;
 
 /******************************************************************************
 Imported global variables and functions (from other files)
@@ -79,6 +83,19 @@ Exported global variables and functions (to be accessed by other files)
 Private global variables and functions
 ******************************************************************************/
 void r_main_userinit(void);
+void ClearChattering(){
+	if(prev!=swt){
+		match_times=0;
+		prev=swt;
+	}
+	else{
+		match_times=match_times+1;
+		if(match_times>2){
+			match_times=0
+			output=swt;
+		}
+	}
+}
 
 /******************************************************************************
 * Function Name: main
@@ -106,7 +123,7 @@ void main(void)
 	
 	while (1) 
 	{
-		if(swt==1){
+		if(output==1){
 			if(flag==SETTING){
 				g_time.second=g_time.second+1;
 				if(g_time.second>59){
@@ -119,7 +136,7 @@ void main(void)
 			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 		}
 		
-		if(swt==2){
+		if(output==2){
 			if(flag==SETTING){
 				g_time.minute=g_time.minute+1;
 				DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
@@ -134,7 +151,7 @@ void main(void)
 			sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
 			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 		}
-		if(swt==3){
+		if(output==3){
 			if(flag==SETTING){
 				flag=COUNTING;
 				DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
@@ -157,7 +174,7 @@ void main(void)
 						g_time.minute=g_time.minute-1;
 					}
 					else {
-						swt=1;
+						output=1;
 						flag=SETTING;
 						DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
 						//sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
