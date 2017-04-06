@@ -79,7 +79,7 @@ Private global variables and functions
 ******************************************************************************/
 __interrupt void intp8_isr(void)
 {
-	swt=1;
+	swt=2;
 }
 
 /******************************************************************************
@@ -93,7 +93,7 @@ __interrupt void intp9_isr(void)
 {
 	//if(start_flag==1) start_flag=2;
 	//	else start_flag=1;	
-	swt=2;
+	swt=3;
 	
 }
 
@@ -107,8 +107,7 @@ __interrupt void intp9_isr(void)
 __interrupt void intp10_isr(void)
 {
 	
-	swt=0;
-	g_time.second=g_time.second+1;
+	swt=1;
 	
 }
 
