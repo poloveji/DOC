@@ -83,19 +83,7 @@ Exported global variables and functions (to be accessed by other files)
 Private global variables and functions
 ******************************************************************************/
 void r_main_userinit(void);
-void ClearChattering(){
-	if(prev!=swt){
-		match_times=0;
-		prev=swt;
-	}
-	else{
-		match_times=match_times+1;
-		if(match_times>2){
-			match_times=0
-			output=swt;
-		}
-	}
-}
+void ClearChattering(void);
 
 /******************************************************************************
 * Function Name: main
@@ -206,6 +194,20 @@ void main(void)
 * Arguments    : none
 * Return Value : none
 ******************************************************************************/
+void ClearChattering(void){
+	if(prev!=swt){
+		match_times=0;
+		prev=swt;
+	}
+	else{
+		match_times=match_times+1;
+		if(match_times>2){
+			match_times=0
+			output=swt;
+		}
+	}
+}
+
 void r_main_userinit(void)
 {
 	uint16_t i;
