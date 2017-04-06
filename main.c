@@ -56,16 +56,16 @@ Typedef definitions
 /******************************************************************************
 Macro definitions
 ******************************************************************************/
-#define LED15_PM       PM4_bit.no1
-#define LED15          P4_bit.no1
-#define LED_ON         (0)
-#define LED_OFF        (1)
+#define SETTING 1 // Setting...
+#define COUNTING 2 // Counting...
+#define PAUSED 3 // Paused...
 int time=0;
 char * string_shown_on_lcd[10];
 int flag=0;
 int swt=0;
 int i=0;
-
+g_time.minute=0;
+g_time.second=0;
 
 /******************************************************************************
 Imported global variables and functions (from other files)
@@ -97,50 +97,45 @@ void main(void)
 	/* Clear LCD display */
 	ClearLCD();
 	DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-	sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
+	sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
 	DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 	/* Initialize external interrupt for switches */
 	intp_init();
 	
 	/* Main loop - Infinite loop */
-	g_time.minute=0;
-	g_time.second=0;
 	
 	while (1) 
 	{
-		if(sw==1){
-			if(flag==0){
+		if(swt==1){
+			if(flag==SETTING){
 				g_time.second=g_time.second+1;
 				if(g_time.second>59){
 					g_time.second=0;
 					g_time.minute=g_time.minute+1;
 				}
-				DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-				flag=1;
-				}
+			}
+			DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
+			sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 		}
 		
-		if(sw==2){
-			if(flag==1){
+		if(swt==2){
+			if(flag==SETTING){
 				g_time.minute=g_time.minute+1;
 				DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-				flag=0;
+				
 			}
-			if(flag==2){ 
+			if(flag==PAUSED){ 
 				g_time.minute=0;
 				g_time.second=0;
 				DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
-				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-				flag=0;
+				flag=SETTING;
 			}
+			sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 		}
-		if(sw==3){
-			if ( (flag==1) && ((g_time.minute!=0) || (g_time.second!=0))) {
+		if(swt==3){
+			if ( (flag==COUNTING) && ((g_time.minute!=0) || (g_time.second!=0))) {
 				g_time.second--;
 				if(g_time.second==0){
 					if(g_time.minute!=0) {
@@ -148,11 +143,11 @@ void main(void)
 						g_time.minute=g_time.minute-1;
 					}
 					else {
-						swt=0;
-						flag=0;
+						swt=1;
+						flag=SETTING;
 						DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-						sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-						DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+						//sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+						//DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 					}
 				}
 				if(g_time.minute==255){
@@ -162,19 +157,19 @@ void main(void)
 					g_time.second=0;
 				}
 				DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
-				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+				//sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+				//DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 				for(i=0; i<=100; i++){
 					Wait1CentiSecond();
 				}
-				flag=0;
 			}
-			if(flag==2){
+			if(flag==PAUSED){
 				DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
-				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-				flag=0;
+				//sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+				//DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 			}
+			sprintf(string_shown_on_lcd,"%0.2d:%0.2d ",g_time.minute, g_time.second);
+			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 		
 		}
 		
