@@ -111,6 +111,7 @@ void main(void)
 	
 	while (1) 
 	{
+		output=0;
 		ClearChattering();
 		if(output==1){
 			if(flag==SETTING){
