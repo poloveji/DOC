@@ -63,7 +63,7 @@ Macro definitions
 int time=0;
 char * string_shown_on_lcd[10];
 int flag=0;
-int sw=0;
+int swt=0;
 int i=0;
 
 
@@ -108,82 +108,77 @@ void main(void)
 	
 	while (1) 
 	{
-		if(sw==0){
-		if(flag==0){
-			g_time.second=g_time.second+1;
-			if(g_time.second>59){
-				g_time.second=0;
-				g_time.minute=g_time.minute+1;
-			}
-			DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-			sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-			
-		}
-		}
 		if(sw==1){
-		if(flag==0){
-			g_time.minute=g_time.minute+1;
-			DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-			sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-			
+			if(flag==0){
+				g_time.second=g_time.second+1;
+				if(g_time.second>59){
+					g_time.second=0;
+					g_time.minute=g_time.minute+1;
+				}
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
+				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
+				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+				flag=1;
+				}
 		}
-		if(flag==2){ 
-			flag=0;
-			g_time.minute=0;
-			g_time.second=0;
-			DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
-			sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-			
-		}
-		}
+		
 		if(sw==2){
-		if ( (flag==1) && ((g_time.minute!=0) || (g_time.second!=0))) {
-			//start_flag = 0;
-			DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
-			g_time.second--;
-			if(g_time.second==0){
-				if(g_time.minute!=0) {
-					g_time.second=59;
-					g_time.minute=g_time.minute-1;
-				}
-				else {
-					sw=0;
-					flag=0;
-					DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
-					sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-					DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-				}
+			if(flag==1){
+				g_time.minute=g_time.minute+1;
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
+				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
+				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+				flag=0;
 			}
-			if(g_time.minute==255){
+			if(flag==2){ 
 				g_time.minute=0;
-			}
-			if(g_time.second==255){
 				g_time.second=0;
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
+				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
+				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+				flag=0;
 			}
-			sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-			for(i=0; i<=100; i++){
-				Wait1CentiSecond();
+		}
+		if(sw==3){
+			if ( (flag==1) && ((g_time.minute!=0) || (g_time.second!=0))) {
+				g_time.second--;
+				if(g_time.second==0){
+					if(g_time.minute!=0) {
+						g_time.second=59;
+						g_time.minute=g_time.minute-1;
+					}
+					else {
+						swt=0;
+						flag=0;
+						DisplayLCD(LCD_LINE1, (uint8_t *)"Setting");
+						sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
+						DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+					}
+				}
+				if(g_time.minute==255){
+					g_time.minute=0;
+				}
+				if(g_time.second==255){
+					g_time.second=0;
+				}
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Counting");
+				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
+				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+				for(i=0; i<=100; i++){
+					Wait1CentiSecond();
+				}
+				flag=0;
 			}
-			flag=1;
+			if(flag==2){
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
+				sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
+				DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+				flag=0;
+			}
+		
+		}
+		
 	}
-		if(flag==2){
-			flag=2;
-			DisplayLCD(LCD_LINE1, (uint8_t *)"Paused");
-			sprintf(string_shown_on_lcd,"%d%d:%d%d ",g_time.minute/10, g_time.minute%10, g_time.second/10, g_time.second%10);
-			DisplayLCD(LCD_LINE2,string_shown_on_lcd);
-			for(i=0; i<=100; i++){
-				Wait1CentiSecond();
-			}
-			
-		}
-		
-		}
-		
-}
 }	
 
 /******************************************************************************
