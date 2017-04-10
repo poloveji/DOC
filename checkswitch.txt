@@ -1,0 +1,197 @@
+#include "r_macro.h"  /* System macro and standard type definition */
+#include "r_spi_if.h" /* SPI driver interface */
+#include "lcd.h"      /* LCD driver interface */
+#include <string.h>
+#include "Glyph_API.h" 
+#include "checkswitch.h"
+#include "timer.h"
+#define PAUSE 1 // define macro for PAUSE state.
+#define RUN 2 // define macro for RUN state.
+#define sw1 0x40 //define switch 1
+#define sw2 0x10 //define switch 1
+#define sw3 0x20 //define switch 1
+int i=0;
+int state=PAUSE; //declare state variable
+int current=0x70; //declare current variable
+int min=0; //declare minute variable
+int sec=0; //declare second variable
+int centisec=0;
+int prev=0x70; //declare previous variable
+int prevoutput=0x70; //declare previous output variable
+int output=0x70; //declare output variable
+int match_times=0; //declare match times variable
+int pressed=0; //declare pushed variable
+int G_elapsedTime=0; //declare elapsed time variable
+char * string_shown_on_lcd[10]; //declare string_shown_on_lcd
+int rec_min[20];
+int rec_sec[20];
+int rec_centisec[20];
+int a=0;
+int time=0;
+int ret=0;
+
+/*Define Clear Chattering function*/
+int ClearChattering(void){
+	prevoutput=output; 			//set previous output as output
+	current = (P7&0x70);			//declare current as switch port
+	if(prev!=current){			//check if previous value is different from current value
+		match_times=0;			//set match time as 0
+		prev=current;			//set previous value as current value
+	}
+	else{					//check if previous value is not different from current value
+		match_times=match_times+1;	//increase match time
+		if(match_times>=70){		//check if match time bigger or equal 7, set match time as 0 and set output value as current value
+			match_times=0;
+			output=current;
+		}
+	}
+	return (output ^ prevoutput) & (~output);
+}
+
+int check_switch(){
+	pressed=ClearChattering(); 
+	if(pressed==sw3){
+		if(state==PAUSE){
+			state=RUN;
+			DisplayLCD(LCD_LINE1, (uint8_t *)"RUNNING");
+			timer_start();
+			ret=0;
+			return ret;
+			
+		}
+		if(state==RUN){
+			
+			Record();
+			//Display();
+			ret=1;
+			return ret;
+		}
+	}
+	
+	if(pressed==sw2){
+		if(state==RUN){
+			a++;
+			DisplayList();
+			ret=2;
+			return ret;
+		}
+	}
+	
+	if(pressed==sw1){
+		if(state==RUN){
+			a--;
+			DisplayList();
+			ret=3;
+			return ret;
+		}
+	}
+	
+	
+	
+}
+void check_sw12(){
+	pressed=ClearChattering();
+	if(pressed==sw1){
+		pressed=ClearChattering();
+		if(pressed==sw2){
+			if(state==PAUSE){
+				min=0;
+				sec=0;
+				centisec=0;
+				Display();
+		}
+			if(state==RUN){
+				state=PAUSE;
+				DisplayLCD(LCD_LINE1, (uint8_t *)"PAUSED");
+				Display();
+		}
+		}
+	}
+}
+void check_sw13(){
+	pressed=ClearChattering();
+	if(pressed==sw1){
+		pressed=ClearChattering();
+		if(pressed==sw3){
+			if(state==RUN){
+				a--;
+				DisplayList();
+				Display();
+				Record();
+			}
+		}
+	}
+}
+
+void check_sw23(){
+	pressed=ClearChattering();
+	if(pressed==sw2){
+		pressed=ClearChattering();
+		if(pressed==sw3){
+			if(state==RUN){
+				a++;
+				DisplayList();
+				Display();
+				Record();
+			}
+		}
+	}
+}
+
+void Record(){
+	for(i=1; i<21; i++){
+		rec_min[i]=min;
+		rec_sec[i]=sec;
+		rec_centisec[i]=centisec;
+	}
+}
+void CountUp(){	
+		if ( update_flag == 10){
+			update_flag = 0;
+			time++;
+			centisec=centisec+10;
+			if(centisec>90){
+				centisec=0;
+				sec=sec+1;
+			}
+			if(sec>59){
+				sec=0;
+				min=min+1;
+			}
+		}
+}
+void Display(){
+	
+	sprintf(string_shown_on_lcd,"%d:%d:%d ", min, sec, centisec);
+	DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+}
+
+void DisplayList(){
+	for(i=0; i<6;i++){
+		sprintf(string_shown_on_lcd, "#%d %d:%d:%d",a+i, rec_min[a-1], rec_sec[a-i], rec_centisec[a-i]);
+				switch(i){
+					case 0:
+					DisplayLCD(LCD_LINE3,string_shown_on_lcd);
+					case 1:
+					DisplayLCD(LCD_LINE4,string_shown_on_lcd);
+					case 2:
+					DisplayLCD(LCD_LINE5,string_shown_on_lcd);
+					case 3:
+					DisplayLCD(LCD_LINE6,string_shown_on_lcd);
+					case 4:
+					DisplayLCD(LCD_LINE7,string_shown_on_lcd);
+					case 5:
+					DisplayLCD(LCD_LINE8,string_shown_on_lcd);
+					
+				}
+		if(a<0) a=0;
+		if(a>19) a=19;
+		if(a==0){
+			DisplayLCD(LCD_LINE1, (uint8_t *)"First record");
+		}
+		if(a==19){
+			DisplayLCD(LCD_LINE1, (uint8_t *)"Last record");
+		}
+			
+	}
+}
