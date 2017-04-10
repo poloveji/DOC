@@ -16,6 +16,7 @@ int current=0x70; //declare current variable
 int min=0; //declare minute variable
 int sec=0; //declare second variable
 int centisec=0;
+int number=0;
 int prev=0x70; //declare previous variable
 int prevoutput=0x70; //declare previous output variable
 int output=0x70; //declare output variable
@@ -26,6 +27,7 @@ char * string_shown_on_lcd[10]; //declare string_shown_on_lcd
 int rec_min[20];
 int rec_sec[20];
 int rec_centisec[20];
+int rec_number[20];
 int a=0;
 int time=0;
 int ret=0;
@@ -48,21 +50,17 @@ int ClearChattering(void){
 	return (output ^ prevoutput) & (~output);
 }
 
+/*Define check switch function*/
 int check_switch(){
 	pressed=ClearChattering(); 
 	if(pressed==sw3){
 		if(state==PAUSE){
 			state=RUN;
-			DisplayLCD(LCD_LINE1, (uint8_t *)"RUNNING");
 			timer_start();
 			ret=0;
 			return ret;
-			
 		}
 		if(state==RUN){
-			
-			Record();
-			//Display();
 			ret=1;
 			return ret;
 		}
@@ -71,7 +69,6 @@ int check_switch(){
 	if(pressed==sw2){
 		if(state==RUN){
 			a++;
-			DisplayList();
 			ret=2;
 			return ret;
 		}
@@ -80,7 +77,6 @@ int check_switch(){
 	if(pressed==sw1){
 		if(state==RUN){
 			a--;
-			DisplayList();
 			ret=3;
 			return ret;
 		}
@@ -89,7 +85,8 @@ int check_switch(){
 	
 	
 }
-void check_sw12(){
+/*Define check switch 1 & switch 2 function*/
+int check_sw12(){
 	pressed=ClearChattering();
 	if(pressed==sw1){
 		pressed=ClearChattering();
@@ -98,16 +95,19 @@ void check_sw12(){
 				min=0;
 				sec=0;
 				centisec=0;
-				Display();
+				ret=4;
+				return ret;
 		}
 			if(state==RUN){
 				state=PAUSE;
-				DisplayLCD(LCD_LINE1, (uint8_t *)"PAUSED");
-				Display();
+				ret=5;
+				return ret;
 		}
 		}
 	}
 }
+
+/*Define check switch 1 & switch 3 function*/
 void check_sw13(){
 	pressed=ClearChattering();
 	if(pressed==sw1){
@@ -115,14 +115,14 @@ void check_sw13(){
 		if(pressed==sw3){
 			if(state==RUN){
 				a--;
-				DisplayList();
-				Display();
-				Record();
+				ret=6;
+				return ret;
 			}
 		}
 	}
 }
 
+/*Define check switch 2 & switch 3 function*/
 void check_sw23(){
 	pressed=ClearChattering();
 	if(pressed==sw2){
@@ -130,21 +130,24 @@ void check_sw23(){
 		if(pressed==sw3){
 			if(state==RUN){
 				a++;
-				DisplayList();
-				Display();
-				Record();
+				ret=7;
+				return ret;
 			}
 		}
 	}
 }
 
+/*Define record function*/
 void Record(){
 	for(i=1; i<21; i++){
+		rec_number[i]=number;
 		rec_min[i]=min;
 		rec_sec[i]=sec;
 		rec_centisec[i]=centisec;
 	}
 }
+
+/*Define counting up function*/
 void CountUp(){	
 		if ( update_flag == 10){
 			update_flag = 0;
@@ -160,15 +163,17 @@ void CountUp(){
 			}
 		}
 }
+
+/*Define displaying minute, second & centisecond function*/
 void Display(){
-	
 	sprintf(string_shown_on_lcd,"%d:%d:%d ", min, sec, centisec);
 	DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 }
 
+/*Define display record list function*/
 void DisplayList(){
 	for(i=0; i<6;i++){
-		sprintf(string_shown_on_lcd, "#%d %d:%d:%d",a+i, rec_min[a-1], rec_sec[a-i], rec_centisec[a-i]);
+		sprintf(string_shown_on_lcd, "#%d %d:%d:%d",rec_number[a-1], rec_min[a-1], rec_sec[a-i], rec_centisec[a-i]);
 				switch(i){
 					case 0:
 					DisplayLCD(LCD_LINE3,string_shown_on_lcd);
@@ -187,6 +192,7 @@ void DisplayList(){
 		if(a<0) a=0;
 		if(a>19) a=19;
 		if(a==0){
+		
 			DisplayLCD(LCD_LINE1, (uint8_t *)"First record");
 		}
 		if(a==19){
