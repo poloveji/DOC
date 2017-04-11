@@ -98,8 +98,7 @@ void main(void)
 	ClearLCD();
 	/*Display default setting state*/
 	DisplayLCD(LCD_LINE1, (uint8_t *)"PAUSED");
-	sprintf(string_shown_on_lcd,"%d:%d:%d ",min, sec, centisec);
-	DisplayLCD(LCD_LINE2,string_shown_on_lcd);
+	Display(min, sec, centisec);
 	timer_init();
 	
 	/* Main loop - Infinite loop */
@@ -109,14 +108,28 @@ void main(void)
 		check_switch();
 		if(ret==1)CountUp();
 		if(ret==2) {
-		Record();
-		CountUp();
+			Record();
+			CountUp();
+			DisplayList();
+		}
+		if(ret==5){
+			DisplayLCD(LCD_LINE1, (uint8_t *)"PAUSED");
+			timer_stop();
+			ret=0;
+		}
+		if(ret==6){
+			min=0;
+			sec=0;
+			centisec=0;
+			Display(min, sec, centisec);
+			ret=0;
 		}
 		if(flag==1)
 		{
-			Display();
+			Display(min, sec, centisec);
 			flag=0;
 		}
+		
 		
 				
 	}
@@ -176,4 +189,3 @@ void r_main_userinit(void)
 /******************************************************************************
 End of file
 ******************************************************************************/
-
