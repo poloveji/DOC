@@ -51,42 +51,41 @@ int ClearChattering(void){
 }
 
 /*Define check switch function*/
-int check_switch(){
+void check_switch(){
 	pressed=ClearChattering(); 
 	if(pressed==sw3){
 		if(state==PAUSE){
-			state=RUN;
 			timer_start();
-			ret=0;
-			return ret;
-		}
-		if(state==RUN){
 			ret=1;
-			return ret;
+			state=RUN;
+			DisplayLCD(LCD_LINE1, (uint8_t *)"RUNNING");
+		}
+		else if(state==RUN){
+			ret=2;
 		}
 	}
-	
+/*
 	if(pressed==sw2){
 		if(state==RUN){
 			a++;
-			ret=2;
-			return ret;
+			ret=3;
 		}
 	}
 	
 	if(pressed==sw1){
 		if(state==RUN){
 			a--;
-			ret=3;
-			return ret;
+			ret=4;
 		}
 	}
-	
-	
-	
+
+	if(pressed==0x50){
+			state=PAUSE;
+			ret=3;
+	}*/
 }
-/*Define check switch 1 & switch 2 function*/
-int check_sw12(){
+/*Define check switch 1 & switch 2 function
+void check_sw12(){
 	pressed=ClearChattering();
 	if(pressed==sw1){
 		pressed=ClearChattering();
@@ -95,63 +94,30 @@ int check_sw12(){
 				min=0;
 				sec=0;
 				centisec=0;
-				ret=4;
-				return ret;
+				ret=5;
 		}
 			if(state==RUN){
 				state=PAUSE;
-				ret=5;
-				return ret;
-		}
-		}
-	}
-}
-
-/*Define check switch 1 & switch 3 function*/
-void check_sw13(){
-	pressed=ClearChattering();
-	if(pressed==sw1){
-		pressed=ClearChattering();
-		if(pressed==sw3){
-			if(state==RUN){
-				a--;
 				ret=6;
-				return ret;
-			}
 		}
-	}
-}
-
-/*Define check switch 2 & switch 3 function*/
-void check_sw23(){
-	pressed=ClearChattering();
-	if(pressed==sw2){
-		pressed=ClearChattering();
-		if(pressed==sw3){
-			if(state==RUN){
-				a++;
-				ret=7;
-				return ret;
-			}
 		}
-	}
+	
 }
+}*/
 
 /*Define record function*/
 void Record(){
-	for(i=1; i<21; i++){
 		rec_number[i]=number;
 		rec_min[i]=min;
 		rec_sec[i]=sec;
 		rec_centisec[i]=centisec;
-	}
 }
 
 /*Define counting up function*/
 void CountUp(){	
 		if ( update_flag == 10){
 			update_flag = 0;
-			time++;
+			//time++;
 			centisec=centisec+10;
 			if(centisec>90){
 				centisec=0;
@@ -201,3 +167,5 @@ void DisplayList(){
 			
 	}
 }
+
+
