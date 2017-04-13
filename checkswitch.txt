@@ -8,15 +8,17 @@
 #define PAUSE 1 // define macro for PAUSE state.
 #define RUN 2 // define macro for RUN state.
 #define sw1 0x40 //define switch 1
-#define sw2 0x10 //define switch 1
-#define sw3 0x20 //define switch 1
+#define sw2 0x10 //define switch 2
+#define sw3 0x20 //define switch 3
+#define sw12 0x50 //define switch 12
 int i=0;
+int j=0;
+int y =1;
 int state=PAUSE; //declare state variable
-int current=0x70; //declare current variable
+int current; //declare current variable
 int min=0; //declare minute variable
 int sec=0; //declare second variable
 int centisec=0;
-int number=0;
 int prev=0x70; //declare previous variable
 int prevoutput=0x70; //declare previous output variable
 int output=0x70; //declare output variable
@@ -27,27 +29,32 @@ char * string_shown_on_lcd[10]; //declare string_shown_on_lcd
 int rec_min[20];
 int rec_sec[20];
 int rec_centisec[20];
-int rec_number[20];
-int a=0;
-int time=0;
 int ret=0;
+int a=0;
+extern int flag;
+
+
 
 /*Define Clear Chattering function*/
 int ClearChattering(void){
-	prevoutput=output; 			//set previous output as output
-	current = (P7&0x70);			//declare current as switch port
-	if(prev!=current){			//check if previous value is different from current value
-		match_times=0;			//set match time as 0
-		prev=current;			//set previous value as current value
+prevoutput = output;
+current = (P7&0x70);
+	if(prev!=current){
+		match_times=0;
+		prev=current;
 	}
-	else{					//check if previous value is not different from current value
-		match_times=match_times+1;	//increase match time
-		if(match_times>=70){		//check if match time bigger or equal 7, set match time as 0 and set output value as current value
+	else{
+		match_times=match_times+1;
+		if(match_times>2){
 			match_times=0;
 			output=current;
+			if (output == 0x20 && prevoutput != 0x20)
+			{
+				prevoutput = 0x70;
+			}
 		}
 	}
-	return (output ^ prevoutput) & (~output);
+return (output ^ prevoutput) & (~output);
 }
 
 /*Define check switch function*/
@@ -64,108 +71,92 @@ void check_switch(){
 			ret=2;
 		}
 	}
-/*
+	
 	if(pressed==sw2){
 		if(state==RUN){
-			a++;
+			j++;
 			ret=3;
 		}
 	}
-	
+
 	if(pressed==sw1){
 		if(state==RUN){
-			a--;
+			j--;
 			ret=4;
 		}
 	}
 
-	if(pressed==0x50){
+	if(pressed==sw12){
+		if(state==RUN){
 			state=PAUSE;
-			ret=3;
-	}*/
+			ret=5;
+		}
+		else if(state==PAUSE){
+			ret=6;
+		}
+	}
 }
-/*Define check switch 1 & switch 2 function
-void check_sw12(){
-	pressed=ClearChattering();
-	if(pressed==sw1){
-		pressed=ClearChattering();
-		if(pressed==sw2){
-			if(state==PAUSE){
-				min=0;
-				sec=0;
-				centisec=0;
-				ret=5;
-		}
-			if(state==RUN){
-				state=PAUSE;
-				ret=6;
-		}
-		}
-	
-}
-}*/
 
 /*Define record function*/
 void Record(){
-		rec_number[i]=number;
+	if(i<20){
 		rec_min[i]=min;
 		rec_sec[i]=sec;
 		rec_centisec[i]=centisec;
+		i++;
+	}
 }
 
 /*Define counting up function*/
-void CountUp(){	
-		if ( update_flag == 10){
-			update_flag = 0;
-			//time++;
-			centisec=centisec+10;
-			if(centisec>90){
-				centisec=0;
-				sec=sec+1;
-			}
-			if(sec>59){
-				sec=0;
-				min=min+1;
-			}
-		}
-}
+//void CountUp(){	
+//		if ( update_flag == 10){
+//			update_flag = 0;
+//			centisec=centisec+10;
+//			if(centisec>90){
+//				centisec=0;
+//				sec=sec+1;
+//			}
+//			if(sec>59){
+//				sec=0;
+//				min=min+1;
+//			}
+//		}
+//}
 
 /*Define displaying minute, second & centisecond function*/
-void Display(){
+void Display(int min, int sec, int centisec){
 	sprintf(string_shown_on_lcd,"%d:%d:%d ", min, sec, centisec);
 	DisplayLCD(LCD_LINE2,string_shown_on_lcd);
 }
 
 /*Define display record list function*/
-void DisplayList(){
-	for(i=0; i<6;i++){
-		sprintf(string_shown_on_lcd, "#%d %d:%d:%d",rec_number[a-1], rec_min[a-1], rec_sec[a-i], rec_centisec[a-i]);
-				switch(i){
-					case 0:
-					DisplayLCD(LCD_LINE3,string_shown_on_lcd);
-					case 1:
-					DisplayLCD(LCD_LINE4,string_shown_on_lcd);
-					case 2:
-					DisplayLCD(LCD_LINE5,string_shown_on_lcd);
-					case 3:
-					DisplayLCD(LCD_LINE6,string_shown_on_lcd);
-					case 4:
-					DisplayLCD(LCD_LINE7,string_shown_on_lcd);
-					case 5:
-					DisplayLCD(LCD_LINE8,string_shown_on_lcd);
-					
-				}
-		if(a<0) a=0;
-		if(a>19) a=19;
-		if(a==0){
+void DisplayList()
+{
+		static k=0;
+		y=1;
+		if(i<6)
+			k=0;
+		else
+			k=i-6;
+		for(j=k;j<k+6;j++){
+			if((rec_min[j]!=0)||(rec_sec[j]!=0)||(rec_centisec[j]!=0)){
+				sprintf(string_shown_on_lcd, "#%d %d:%d:%d",j+1, rec_min[j], rec_sec[j], rec_centisec[j]);
+				DisplayLCD( (LCD_LINE2 + y*8),(uint8_t*) string_shown_on_lcd);
+				y++;				
+
+		//if(a<0) a=0;
+		//if(a>19) a=19;
+		/*if(j==0){
 		
 			DisplayLCD(LCD_LINE1, (uint8_t *)"First record");
 		}
-		if(a==19){
+		if(j==19){
 			DisplayLCD(LCD_LINE1, (uint8_t *)"Last record");
-		}
+		}*/
 			
 	}
+	ret=1;
+}
 }
 
 
