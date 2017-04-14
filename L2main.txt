@@ -64,6 +64,7 @@ Macro definitions
 #define sw3 0x20 //define switch 1
 
 int flag=0;
+int b;
 
 //char * string_shown_on_lcd[10];
 
@@ -106,7 +107,6 @@ void main(void)
 	while (1) 
 	{	
 		check_switch();
-		//if(ret==1)CountUp();
 		if(ret==2) {
 			Record();
 			DisplayList();
@@ -123,33 +123,32 @@ void main(void)
 			sec=0;
 			centisec=0;
 			Display(min, sec, centisec);
+			ClearLCD();
+			i=0;
+			DisplayLCD(LCD_LINE1, (uint8_t *)"PAUSED");
+			Display(min, sec, centisec);
+			for(b=0;b<20;b++){
+				rec_min[b]=0;
+				rec_sec[b]=0;
+				rec_centisec[b]=0;
+			}
+			record_inc=0;
+			scroll=0;
 			ret=0;
 			timer_stop();
 		}
-		
 		if(ret==3){
-			if(j>19){
-				j=19;
-				DisplayLCD(LCD_LINE1, "Last record  ");
-			}
 			DisplayList();
-			ret=1;
 		}
-		else if(ret==4){
-			if(j<0) {
-				j=0; 
-				DisplayLCD(LCD_LINE1, "No record  ");
-			}
-			if(j==0){
-				DisplayLCD(LCD_LINE1, "First record  ");
-			}
+		if(ret==4){
 			DisplayList();
-			ret=1;
 		}
-		
 		if(flag==1)
 		{
 			Display(min, sec, centisec);
+			if((sec==temp_sec+2)&&(centisec==temp_centi)){
+				DisplayLCD(LCD_LINE1, (uint8_t *)"RUNNING");
+			}
 			flag=0;
 		}
 		
