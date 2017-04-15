@@ -97,12 +97,7 @@ void check_switch(){
 				scroll=0;
 				temp_sec=sec;
 				temp_centi=centisec;
-				if(i==0 && rec_min==0 && rec_sec==0 && rec_centisec==0){
-					first_record=1;
-				}
-				else {
-					first_record=2;
-				}
+				first_record=1;
 			}
 			ret=4;
 		}
@@ -161,15 +156,21 @@ void DisplayList()
 			k=scroll;
 		}
 		if(first_record==1){
-			DisplayLCD(LCD_LINE1, (uint8_t *)"No Record");
-			first_record=0;
-		}
-		else if(first_record==2){
-			DisplayLCD(LCD_LINE1, (uint8_t *)"First record");
+			if(i==0 && rec_min==0 && rec_sec==0 && rec_centisec==0){
+				DisplayLCD(LCD_LINE1,(uint8_t *) "No record");
+			}
+			else {
+				DisplayLCD(LCD_LINE1, (uint8_t *)"First Record"); 
+			}
 			first_record=0;
 		}
 		else if(last_record==1){
-			DisplayLCD(LCD_LINE1, (uint8_t *)"Last record");
+			if(i==0 && rec_min==0 && rec_sec==0 && rec_centisec==0){
+				DisplayLCD(LCD_LINE1,(uint8_t *) "No record");
+			}
+			else {
+				DisplayLCD(LCD_LINE1, (uint8_t *)"Last record");
+			}
 			last_record=0;
 		}
 		else{
