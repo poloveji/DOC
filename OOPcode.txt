@@ -1,1 +1,0 @@
-https://github.com/gomjellie/AndroidPractice/tree/7895dccbbaf6dcefa1bc7db1e5f35e028856f62f/Gomoku/app/src/main/java/com/gomjellie/gomoku
