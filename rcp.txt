@@ -1,0 +1,2 @@
+https://eclipsesource.com/blogs/tutorials/rcp-testing-tool-rcptt-basic-tutorial/
+https://www.eclipse.org/rcptt/documentation/userguide/contexts/group/
